@@ -3,7 +3,7 @@ import socket
 from _thread import *
 import sys
 
-server = "10.11.45.248"
+server = "10.11.53.68"
 # usually 5555 port is open
 port = 5555
 
@@ -19,4 +19,42 @@ except socket.error as e:
     str(e)
 
 # opens up the port for connections, if no arguments, unlimited connections
-s.listen(3)
+s.listen(2)
+print("Waiting for a connection, Server Started")
+
+
+# threaded function
+    
+def threaded_client(conn):
+    conn.send(str.encode("Connected"))
+    reply = ""
+    while True:
+        try:
+            # 2048 bits is amt of info we want to receive
+            data = conn.recv(2048)
+            # have to decode because hwen sending data between client to server, we hav to encode
+            reply = data.decode("utf-8")
+
+            if not data:
+                print("Disconnected")
+                break
+            else:
+                print("Received: ", reply)
+                print("Sending : ", reply)
+
+            # hav to encode info bc sending across server
+            conn.sendall(str.encode(reply))
+        except:
+            break
+
+    print("Lost connection")
+    conn.close()
+
+# while loop to continously look for connections
+while True:
+    # accept accepts the connection and the connection is stored in the variable 
+    conn, addr = s.accept()
+    print("Connected to:", addr)
+
+    # threading allows the loop to run without the function finishing executing, the threaded function can be a process in the backgorund and a llow the while loop to continue
+    start_new_thread(threaded_client, (conn,))
