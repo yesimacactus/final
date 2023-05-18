@@ -1,6 +1,6 @@
 import pygame as pg
 from random import randint
-from Settings1 import *
+from sets1 import *
 from time import sleep
 
 def type():
@@ -96,6 +96,5 @@ while running:
     
     pg.display.flip
 
-
-
 pg.quit()
+
