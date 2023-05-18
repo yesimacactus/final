@@ -1,11 +1,11 @@
 import pygame
+from work import Network
 
-width = 800
-height = 600
+width = 500
+height = 500
 win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Client")
 
-# number of client
 clientNumber = 0
 
 
@@ -17,7 +17,7 @@ class Player():
         self.height = height
         self.color = color
         self.rect = (x,y,width,height)
-        self.vel = 2
+        self.vel = 3
 
     def draw(self, win):
         pygame.draw.rect(win, self.color, self.rect)
@@ -37,28 +37,51 @@ class Player():
         if keys[pygame.K_DOWN]:
             self.y += self.vel
 
+        self.update()
+
+    def update(self):
         self.rect = (self.x, self.y, self.width, self.height)
 
+# sending positions of each client 
+def read_pos(str):
+    str = str.split(",")
+    return int(str[0]), int(str[1])
 
-def redrawWindow(win,player):
+
+def make_pos(tup):
+    return str(tup[0]) + "," + str(tup[1])
+
+
+def redrawWindow(win,player, player2):
     win.fill((255,255,255))
     player.draw(win)
+    player2.draw(win)
     pygame.display.update()
 
 
 def main():
     run = True
-    p = Player(50,50,100,100,(0,255,0))
+    # connecting to server
+    n = Network()
+    startPos = read_pos(n.getPos())
+    p = Player(startPos[0],startPos[1],100,100,(0,255,0))
+    p2 = Player(0,0,100,100,(255,0,0))
     clock = pygame.time.Clock()
 
     while run:
         clock.tick(60)
+        p2Pos = read_pos(n.send(make_pos((p.x, p.y))))
+        p2.x = p2Pos[0]
+        p2.y = p2Pos[1]
+        p2.update()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
                 pygame.quit()
 
         p.move()
-        redrawWindow(win, p)
+        redrawWindow(win, p, p2)
 
 main()
+
